@@ -43,15 +43,21 @@ if (gpio_level == 1 && buttonRealsed == false)
     this->buttonRealsed = true;
     this->startTickButton = xTaskGetTickCount();
     
-    if (condition)
-    {
-        /* code */
-    }
-    
 
     this->onPressed_cb(this->pin);
 }
 
+if(gpio_level == 0 && buttonRealsed == true){
+    TickType_t timeSincePressed = xTaskGetTickCount() - startTickButton;
+
+    if (timeSincePressed >= pdMS_TO_TICKS(DEBOUNCE_TIME_US)) {
+        this->onRealsed_cb(this->pin);
+
+        this->buttonRealsed = false;
+        this->startTickButton = xTaskGetTickCount();
+    };
+    
+};
 
 
 

@@ -19,13 +19,16 @@ class Button{
     uint64_t lastDebounceTime;
     int buttonRealsed;
     int startTickButton;
+    int timeSincePressed;
     TickType_t startTick;
 
     typedef int (*onPressed_cb1)(int);
     onPressed_cb1 onPressed_cb = NULL;
 
+    typedef int(*onRealsed_cb1)(int);
+    onRealsed_cb1 onRealsed_cb = NULL;
+
 
 };
 
 #endif //BUTTON_H
-
