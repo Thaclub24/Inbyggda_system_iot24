@@ -1,5 +1,7 @@
 #include "Button.h"
 #include "driver/gpio.h"
+#include "freertos/FreeRTOS.h"
+
 
 #define PULL_DOWN (gpio_pulldown_t) 0
 #define PULL_UP (gpio_pullup_t) 0
@@ -7,6 +9,9 @@
 
 Button::Button(gpio_num_t P_pin){
 this->pin = P_pin;
+this->lastState = false;
+this->state = false;
+this->lastDebounceTime = 0;
 }
 
 void Button::init(){
@@ -30,7 +35,32 @@ Debounce krävs
 10 milisekunders period eller snabbare (Gäller alla komponenter)
 Får ej använda delay eller fastna här, ingen while loop.
 */
+gpio_num_t GPIO_NUM_12 = (gpio_num_t)this->pin;
+int gpio_level = gpio_get_level(GPIO_NUM_12);
+
+if (gpio_level == 1 && buttonRealsed == false)
+{
+    this->buttonRealsed = true;
+    this->startTickButton = xTaskGetTickCount();
+    
+    if (condition)
+    {
+        /* code */
+    }
+    
+
+    this->onPressed_cb(this->pin);
+}
+
+
+
+
 state = false;
 
+
+};
+
+//bool Button::isPressed()
+void Button::setOnPressed(int (*)(int)){
 
 };

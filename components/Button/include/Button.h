@@ -12,9 +12,19 @@ class Button{
     void init();
     void update();
     bool isPressed();
-    void setOnPressed(void(*onPressed)(int pin));
+    void setOnPressed(int(*onPressed)(int pin));
     int pin;
-    int state;
+    bool state;
+    bool lastState;
+    uint64_t lastDebounceTime;
+    int buttonRealsed;
+    int startTickButton;
+    TickType_t startTick;
+
+    typedef int (*onPressed_cb1)(int);
+    onPressed_cb1 onPressed_cb = NULL;
+
+
 };
 
 #endif //BUTTON_H
