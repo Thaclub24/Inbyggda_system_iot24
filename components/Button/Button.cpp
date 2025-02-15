@@ -2,71 +2,67 @@
 #include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"
 
+#define PULL_DOWN GPIO_PULLDOWN_DISABLE
+#define PULL_UP GPIO_PULLUP_ENABLE  // Ändrat till ENABLE så knappen fungerar
+#define DEBOUNCE_TIME_MS 10  // 10ms debounce
 
-#define PULL_DOWN (gpio_pulldown_t) 0
-#define PULL_UP (gpio_pullup_t) 0
-#define DEBOUNCE_TIME_US 10000  // 10ms debounce
-
-Button::Button(gpio_num_t P_pin){
-this->pin = P_pin;
-this->lastState = false;
-this->state = false;
-this->lastDebounceTime = 0;
+Button::Button(gpio_num_t P_pin) {
+    this->pin = P_pin;
+    this->lastState = false;
+    this->state = false;
+    this->lastDebounceTime = 0;
+    this->buttonReleased = true;  // ✅ Viktigt! Sätt till true från början
+    this->startTickButton = 0;
+    this->timeSincePressed = 0;
+    this->onPressed_cb = NULL;
+    this->onReleased_cb = NULL;
 }
-
-void Button::init(){
-    gpio_config_t buttonConfig;
+void Button::init() {
+    gpio_config_t buttonConfig = {};
     buttonConfig.mode = GPIO_MODE_INPUT;
     buttonConfig.intr_type = GPIO_INTR_DISABLE;
     buttonConfig.pull_down_en = PULL_DOWN;
     buttonConfig.pull_up_en = PULL_UP;
     buttonConfig.pin_bit_mask = 1ULL << pin;
+
     esp_err_t error = gpio_config(&buttonConfig);
-
     if (error != ESP_OK) {
-        printf("GPIO configuration failed for pin %d with error code: %d\n", GPIO_NUM_12, error);
+        printf("GPIO configuration failed for pin %d with error code: %d\n", pin, error);
     }
-
-};
-
-void Button::update(){
-/*xxx update (xxx)
-Debounce krävs
-10 milisekunders period eller snabbare (Gäller alla komponenter)
-Får ej använda delay eller fastna här, ingen while loop.
-*/
-gpio_num_t GPIO_NUM_12 = (gpio_num_t)this->pin;
-int gpio_level = gpio_get_level(GPIO_NUM_12);
-
-if (gpio_level == 1 && buttonRealsed == false)
-{
-    this->buttonRealsed = true;
-    this->startTickButton = xTaskGetTickCount();
-    
-
-    this->onPressed_cb(this->pin);
 }
 
-if(gpio_level == 0 && buttonRealsed == true){
-    TickType_t timeSincePressed = xTaskGetTickCount() - startTickButton;
+void Button::update() {
+    int gpio_level = gpio_get_level((gpio_num_t)pin); // FIXAT
 
-    if (timeSincePressed >= pdMS_TO_TICKS(DEBOUNCE_TIME_US)) {
-        this->onRealsed_cb(this->pin);
+    TickType_t currentTick = xTaskGetTickCount();
 
-        this->buttonRealsed = false;
-        this->startTickButton = xTaskGetTickCount();
-    };
-    
-};
+    if (gpio_level == 1 && buttonReleased) {
+        buttonReleased = false;
+        startTickButton = currentTick;
+
+        if (onPressed_cb) {
+            onPressed_cb(pin);
+        }
+    }
+
+    if (gpio_level == 0 && !buttonReleased) {
+        timeSincePressed = currentTick - startTickButton;
+
+        if (timeSincePressed >= pdMS_TO_TICKS(DEBOUNCE_TIME_MS)) {
+            if (onReleased_cb) {
+                onReleased_cb(pin);
+            }
+
+            buttonReleased = true;
+            startTickButton = currentTick;
+        }
+    }
+}
 
 
-
-state = false;
-
-
-};
-
-//bool Button::isPressed()
-void Button::setOnPressed(int (*)(int)){
-
-};
+void Button::setOnPressed(int (*callback)(int)) {
+    onPressed_cb = callback;  // Spara callback
+}
+void Button::setOnReleased(int (*onReleased)(int pin)) {
+    this->onReleased_cb = onReleased;
+}
