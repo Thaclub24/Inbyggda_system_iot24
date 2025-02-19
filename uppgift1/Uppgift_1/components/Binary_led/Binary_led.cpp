@@ -30,18 +30,21 @@ void BinaryLed::update(TickType_t tickInterval){
             (!ledState && (now - lastToggleTime) * portTICK_PERIOD_MS >= offTime)){
         
             ledState = !ledState;
-            gpio_set_level(pin, ledState);
             lastToggleTime = now;
         }
+       
         
     }
+    gpio_set_level(pin, ledState);
+
+
 
 }
 
-void BinaryLed::steLed(bool value){
+void BinaryLed::setLed(bool value){
     blinking = false;
     ledState = value;
-    gpio_set_level(pin, ledState);
+   
 
 }
 

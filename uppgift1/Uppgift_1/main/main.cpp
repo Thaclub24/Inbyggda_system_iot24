@@ -2,14 +2,16 @@
 #include "Button.h"
 #include "Potentiometer.h"
 #include "Binary_led.h"
-//#include "AnalogLed.h"
+#include "AnalogLed.h"
 #include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "esp_log.h"
 
-#define LED_PIN GPIO_NUM_12
+#define LED_PIN GPIO_NUM_4
 #define LED_TIMER LEDC_TIMER_0
 #define LED_CHANNEL LEDC_CHANNEL_0
+#define TAG "POTENTIOMETER"
 
 // Callback-funktion för när knappen trycks ner / Button
 int onPressed_cb(int pin) {
@@ -30,30 +32,37 @@ void myThresholdCallback(adc1_channel_t pin_adc, int value) {
 }
 
 //För Analog led
-/*extern "C" void app_main(void) {
-    AnalogLed led(LED_PIN,);
+extern "C" void app_main(void) {
+    AnalogLed led(LED_PIN);
     led.init();
+    
+    
+    led.settLed(5000);
+    led.useSin(true, 500);
 
-    // Fading effekt, uppdaterar PWM-värdet var 10:e ms
     while (1) {
-        led.update();  // Uppdaterar LED:ens ljusstyrka
-        vTaskDelay(pdMS_TO_TICKS(50));  // Vänta en liten stund innan nästa uppdatering
+        led.update();
+          // Uppdaterar LED:ens ljusstyrka
+        vTaskDelay(pdMS_TO_TICKS(50));  //  Det tar en stund innan nästa uppdatering
     }
-}*/
+}
 
 //För binary led
-extern "C" void app_main(void){
+/*extern "C" void app_main(void){
     BinaryLed led(LED_PIN);
     led.init();
 
-    led.blink(500,500);
+    led.blink(100,2000);
+
+    led.steLed(0);
 
     while (1){
         led.update(pdMS_TO_TICKS(10));
         vTaskDelay(pdMS_TO_TICKS(10));
     }
     
-}
+}*/
+
 
 //För potentiometer
 /*extern "C" void app_main(void) {
@@ -69,11 +78,11 @@ extern "C" void app_main(void){
     vTaskDelay(pdMS_TO_TICKS(10));
    }
    
-}*/
+} */
 
 //För button
 /*extern "C" void app_main(void) {
-    Button knapp1((gpio_num_t)GPIO_NUM_12);
+    Button knapp1((gpio_num_t)GPIO_NUM_4);
     knapp1.init();
     
     // Registrera callbacks

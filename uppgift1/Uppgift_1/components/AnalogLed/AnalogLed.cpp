@@ -33,34 +33,30 @@ void AnalogLed::init() {
 }
 
 void AnalogLed::update() {
-    if (increasing) {
-        current_duty += DUTY_STEP;
-        if (current_duty >= DUTY_CYCLE_MAX) {
-            current_duty = DUTY_CYCLE_MAX;
-            increasing = false;
+    if(useSinWave){
+        TickType_t currentTime = xTaskGetTickCount();
+        float timeElapsed = (currentTime - startTime) * portTICK_PERIOD_MS;  
+        float angle = (2 * M_PI * timeElapsed) / period;
+        current_duty = (std::sin(angle) + 1) * (DUTY_CYCLE_MAX / 2);
+
+        if (timeElapsed >= period) {
+            startTime = xTaskGetTickCount();  // Nollställ starttid
         }
-    } else {
-        current_duty -= DUTY_STEP;
-        if (current_duty <= DUTY_CYCLE_MIN) {
-            current_duty = DUTY_CYCLE_MIN;
-            increasing = true;
-        }
-    }
+    } 
     ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, current_duty); 
     ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0); 
-    ESP_LOGI("AnalogLed", "LED PWM Duty Cycle: %d", current_duty);
+    //ESP_LOGI("AnalogLed", "LED PWM Duty Cycle: %d", current_duty);
+
 }
 
-void AnalogLed::setLed(int value) {
-    ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, value); 
-    ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0); 
+void AnalogLed::settLed(int value) {
+    current_duty = value;
+    this->useSinWave = false;
     ESP_LOGI("AnalogLed", "Set LED PWM duty Cycle to: %d", value);
 }
 
-void AnalogLed::sin(uint32_t period) {
-    for (uint32_t t = 0; t < period; ++t) {
-        current_duty = (std::sin(t * 2 * M_PI / period) + 1) * DUTY_CYCLE_MAX / 2; // ✅ Fixad
-        update();
-        vTaskDelay(pdMS_TO_TICKS(10)); 
-    }
+void AnalogLed::useSin(bool enable,uint32_t period) {
+    this->period = period;
+    this->useSinWave = true;
+    this->startTime = xTaskGetTickCount();
 }

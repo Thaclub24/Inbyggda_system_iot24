@@ -3,7 +3,7 @@
 #include "freertos/FreeRTOS.h"
 
 #define PULL_DOWN GPIO_PULLDOWN_DISABLE
-#define PULL_UP GPIO_PULLUP_ENABLE  // Ändrat till ENABLE så knappen fungerar
+#define PULL_UP GPIO_PULLUP_DISABLE 
 #define DEBOUNCE_TIME_MS 10  // 10ms debounce
 
 Button::Button(gpio_num_t P_pin) {
@@ -11,7 +11,7 @@ Button::Button(gpio_num_t P_pin) {
     this->lastState = false;
     this->state = false;
     this->lastDebounceTime = 0;
-    this->buttonReleased = true;  // ✅ Viktigt! Sätt till true från början
+    this->buttonReleased = true; 
     this->startTickButton = 0;
     this->timeSincePressed = 0;
     this->onPressed_cb = NULL;
@@ -32,7 +32,7 @@ void Button::init() {
 }
 
 void Button::update() {
-    int gpio_level = gpio_get_level((gpio_num_t)pin); // FIXAT
+    int gpio_level = gpio_get_level((gpio_num_t)pin); 
 
     TickType_t currentTick = xTaskGetTickCount();
 
@@ -59,6 +59,9 @@ void Button::update() {
     }
 }
 
+bool Button::isPressed(){
+    return !buttonReleased;
+}
 
 void Button::setOnPressed(int (*callback)(int)) {
     onPressed_cb = callback;  // Spara callback

@@ -13,7 +13,7 @@ class BinaryLed{
 
     void init();
     void update(TickType_t tickInterval);
-    void steLed(bool value);
+    void setLed(bool value);
     void blink(int milliseconds_on, int milliseconds_off);
 
     private:
