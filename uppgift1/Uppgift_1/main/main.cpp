@@ -26,26 +26,26 @@ int onReleased_cb(int pin) {
 }
 
 //Detta är för Potentiometer
-void myThresholdCallback(adc1_channel_t pin_adc, int value) {
-    printf("Threshold passed! Pin: %d, Value: %d\n", pin_adc, value);
-    
+void myThresholdCallback(adc_channel_t channel, int value) {
+    printf("Tröskel passerad på kanal %d med värde %d\n", channel, value);
 }
 
+
 //För Analog led
-extern "C" void app_main(void) {
+/*extern "C" void app_main(void) {
     AnalogLed led(LED_PIN);
     led.init();
-    
-    
-    led.settLed(5000);
-    led.useSin(true, 500);
+    led.settLed(500); 
+    led.useSin(true, 1500);
+   
 
+   
     while (1) {
         led.update();
           // Uppdaterar LED:ens ljusstyrka
         vTaskDelay(pdMS_TO_TICKS(50));  //  Det tar en stund innan nästa uppdatering
     }
-}
+}*/
 
 //För binary led
 /*extern "C" void app_main(void){
@@ -65,20 +65,18 @@ extern "C" void app_main(void) {
 
 
 //För potentiometer
-/*extern "C" void app_main(void) {
-   Potentiometer pot(ADC1_CHANNEL_0);
+extern "C" void app_main(void) {
+    Potentiometer pot(ADC_CHANNEL_0);
+    pot.init();
+    pot.setActive(true);
+    pot.setOnThreshold(2000, false, myThresholdCallback);
 
-   pot.init();
-
-   pot.setOnThreshold(2000, true, myThresholdCallback);
-
-   while (1)
-   {
-    pot.update();
-    vTaskDelay(pdMS_TO_TICKS(10));
-   }
-   
-} */
+    while (1) {
+        pot.update();
+       // printf("ADC Värde: %d\n", pot.getValue());
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
+}
 
 //För button
 /*extern "C" void app_main(void) {
