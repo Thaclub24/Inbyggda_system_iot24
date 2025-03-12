@@ -3,6 +3,7 @@
 #include "Potentiometer.h"
 #include "Binary_led.h"
 #include "AnalogLed.h"
+#include "Configuration.h"
 #include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -30,7 +31,20 @@ void myThresholdCallback(adc_channel_t channel, int value) {
     printf("Tröskel passerad på kanal %d med värde %d\n", channel, value);
 }
 
+//För configuration
+extern "C" void app_main(void){
+    Configuration config;
+    config.init();
+    
+    printf("Device Name: %s\n", config.getDeviceName());
+    printf("Serial Number: %s\n", config.getSerialNumber());
 
+    config.setDeviceName("ESP32_DevKit");
+    config.setSerialNumber("123456789");
+
+    printf("Updated Device Name: %s\n", config.getDeviceName());
+    printf("Updated Serial Number: %s\n", config.getSerialNumber());
+}
 //För Analog led
 /*extern "C" void app_main(void) {
     AnalogLed led(LED_PIN);
@@ -65,7 +79,7 @@ void myThresholdCallback(adc_channel_t channel, int value) {
 
 
 //För potentiometer
-extern "C" void app_main(void) {
+/*extern "C" void app_main(void) {
     Potentiometer pot(ADC_CHANNEL_0);
     pot.init();
     pot.setActive(true);
@@ -76,7 +90,7 @@ extern "C" void app_main(void) {
        // printf("ADC Värde: %d\n", pot.getValue());
         vTaskDelay(pdMS_TO_TICKS(100));
     }
-}
+}*/
 
 //För button
 /*extern "C" void app_main(void) {
